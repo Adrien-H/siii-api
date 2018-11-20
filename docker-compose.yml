@@ -1,0 +1,21 @@
+version: '3.7'
+
+services:
+
+  siii_mysql:
+    image: 'mysql'
+    command: '--default-authentication-plugin=mysql_native_password'
+    environment:
+      MYSQL_DATABASE: 'siii'
+      MYSQL_USER: 'siiidev'
+      MYSQL_PASSWORD: 'siiidev'
+      MYSQL_ROOT_PASSWORD: 'root'
+    ports:
+      - '8101:3306'
+    volumes:
+      - './.data/mysql:/var/lib/mysql'
+
+  siii_adminer:
+    image: 'adminer'
+    ports:
+      - '8102:8080'
