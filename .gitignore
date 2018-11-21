@@ -15,3 +15,7 @@
 /.idea/
 /.data/
 ###< app ###
+###> symfony/phpunit-bridge ###
+.phpunit
+/phpunit.xml
+###< symfony/phpunit-bridge ###

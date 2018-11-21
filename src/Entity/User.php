@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Entity\User;
+namespace App\Entity;
 
 use Symfony\Component\Security\Core\User\UserInterface;
 

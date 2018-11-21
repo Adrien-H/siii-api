@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<phpunit
+        colors="true"
+        bootstrap="vendor/autoload.php"
+        failOnRisky="true"
+        failOnWarning="true"
+>
+
+    <testsuites>
+        <testsuite name="All">
+            <directory>./tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <php>
+        <ini name="error_reporting" value="-1" />
+        <env name="KERNEL_CLASS" value="App\Kernel" />
+        <env name="APP_ENV" value="test"/>
+        <env name="APP_SECRET" value="0913c0c0e1e67c557b2023453baedd40"/>
+        <env name="SHELL_VERBOSITY" value="-1" />
+    </php>
+
+    <listeners>
+        <listener class="Symfony\Bridge\PhpUnit\CoverageListener" />
+        <listener class="Symfony\Bridge\PhpUnit\SymfonyTestsListener" />
+    </listeners>
+
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">./src</directory>
+        </whitelist>
+    </filter>
+</phpunit>
