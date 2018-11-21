@@ -9,7 +9,12 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Annotation as Serializer;
 
 /**
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
+ * @ORM\Table(
+ *     indexes={
+ *         @ORM\Index(name="search_idx", columns={"email"})
+ *     }
+ * )
  *
  * @package App\Entity\User
  */
@@ -61,13 +66,6 @@ class User implements UserInterface
      * @var string|null
      */
     private $salt;
-
-    /**
-     * @ORM\Column(type="string", length=127, nullable=false, unique=true)
-     *
-     * @var string|null
-     */
-    private $apiToken;
 
     /**
      * @var string[]
@@ -175,25 +173,6 @@ class User implements UserInterface
     /**
      * @return string|null
      */
-    public function getApiToken(): ?string
-    {
-        return $this->apiToken;
-    }
-
-    /**
-     * @param string|null $apiToken
-     * @return User
-     */
-    public function setApiToken(?string $apiToken): self
-    {
-        $this->apiToken = $apiToken;
-
-        return $this;
-    }
-
-    /**
-     * @return string|null
-     */
     public function getPlainPassword(): ?string
     {
         return $this->plainPassword;
@@ -217,7 +196,7 @@ class User implements UserInterface
      */
     public function getRoles(): array
     {
-        return $this->roles;
+        return ['ROLE_USER'];
     }
 
     /**
