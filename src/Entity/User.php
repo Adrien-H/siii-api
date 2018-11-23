@@ -259,8 +259,10 @@ class User implements UserInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @return string|null
      */
-    public function getUsername()
+    public function getUsername(): ?string
     {
         return $this->email;
     }

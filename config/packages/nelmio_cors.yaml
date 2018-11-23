@@ -10,3 +10,5 @@ nelmio_cors:
     paths:
         '^/login':
             allow_methods: ['POST']
+        '^/users/me':
+            allow_methods: ['GET']

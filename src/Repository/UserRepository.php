@@ -13,6 +13,18 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class UserRepository extends EntityRepository
 {
     /**
+     * @param string|null $identity
+     *
+     * @return UserInterface|null
+     *
+     * @throws NonUniqueResultException
+     */
+    public function findByIdentity(?string $identity): ?UserInterface
+    {
+        return $this->findByEmail($identity);
+    }
+
+    /**
      * @param string|null $email
      *
      * @return UserInterface|null
