@@ -1,40 +1,81 @@
 #!/usr/bin/env python3
 
-from subprocess import run
 import sys
 import shutil
 import argparse
+import json
+from subprocess import run, PIPE
 
 
-"""
-@todo 
-mkdir config/jwt
-openssl genrsa -out config/jwt/private.pem -aes256 4096
-openssl rsa -pubout -in config/jwt/private.pem -out config/jwt/public.pem
-"""
+# -------- MAIN
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Build project")
+    parser = argparse.ArgumentParser(
+        description="Automatic build script. Black magic involved.\n" +
+                    "This will basically install project dependencies,\n" +
+                    "build assets and make coffee.\n" +
+                    "\n" +
+                    "Initialization commands are launched on first\n" +
+                    "execution, or at any time if explicitly requested.\n" +
+                    "\n"
+                    "Examples: " + BC.BOLD + "./build" + BC.ENDC + "\n"
+                    "          " + BC.BOLD + "./build prod" + BC.ENDC + "\n",
+        add_help=False,
+        formatter_class=argparse.RawDescriptionHelpFormatter)
     possible_envs = ["dev", "test", "prod"]
     parser.add_argument("env",
-                        help="Build environment",
+                        help="Build environment (default: dev)",
                         choices=possible_envs,
                         nargs="?",
                         default="dev")
+    parser.add_argument("-h", "--help",
+                        help="Show this helpful message (:",
+                        action="help",
+                        default=argparse.SUPPRESS)
+    parser.add_argument("-v", "--version",
+                        help="Show project version",
+                        action="version",
+                        version="Project version: %s" % get_app_version())
+    parser.add_argument("-i", "--force-init",
+                        help="Force project to initialize again",
+                        action="store_true")
+    parser.add_argument("-n", "--no-init",
+                        help="Skip initialization even if needed",
+                        action="store_true")
     args = parser.parse_args()
 
     print_build_msg(args.env)
+
+    if not args.no_init and (is_init_needed() or args.force_init):
+        init(args.env)
+
     if args.env == "dev":
         dev()
     elif args.env == "test":
         test()
     elif args.env == "prod":
         prod()
-    else:
-        print_error('Wrong environment. WTF is "%s"?' % args.env)
-        sys.exit(1)
+
     sys.exit(0)
+
+
+# -------- COMMANDS
+
+
+def init(env):
+    requirements("mkdir", "openssl")
+    run(["mkdir", "config/jwt"])
+    run(["openssl", "genrsa", "-out",
+         "config/jwt/private.pem", "-aes256", "4096"])
+    run(["openssl", "rsa", "-pubout",
+         "-in", "config/jwt/private.pem", "-out", "config/jwt/public.pem"])
+    if env is "prod":
+        print(BC.BOLD + BC.WARNING +
+              "Don't forget to export environment variables...\n" +
+              "Dotenv component has no power here. (:" +
+              BC.ENDC)
+    mark_init_as_needed(False)
 
 
 def dev():
@@ -61,6 +102,23 @@ def prod():
 # -------- UTILS
 
 
+def is_init_needed():
+    try:
+        with open("var/build-infos.json", "r") as f:
+            data = json.load(f)
+            return data['init_needed']
+    except (FileNotFoundError, TypeError):
+        mark_init_as_needed()
+        return True
+
+
+def mark_init_as_needed(needed: bool = True):
+    with open("var/build-infos.json", "w") as f:
+        f.write(json.dumps({
+            "init_needed": needed
+        }))
+
+
 def requirements(*names):
     try:
         for name in names:
@@ -69,6 +127,18 @@ def requirements(*names):
     except SystemError as e:
         print_error(str(e))
         sys.exit(1)
+
+
+def get_app_version():
+    requirements("git")
+    tag = run(
+        ["git", "describe", "--abbrev=0", "--tags"], stdout=PIPE, stderr=PIPE)
+    commit = run(
+        ["git", "rev-parse", "--short", "HEAD"], stdout=PIPE, stderr=PIPE)
+    if tag.returncode is 0:
+        return tag.stdout.decode("UTF-8")
+    else:
+        return commit.stdout.decode("UTF-8")
 
 
 def print_build_msg(env):
