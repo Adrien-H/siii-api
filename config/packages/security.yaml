@@ -2,6 +2,9 @@ security:
     encoders:
         App\Entity\User:
             algorithm: argon2i
+            memory_cost: '%env(ARGON2I_MEMORY_COST)%'
+            time_cost: '%env(ARGON2I_TIME_COST)%'
+            threads: '%env(ARGON2I_THREADS)%'
     providers:
         main:
             entity: { class: App\Entity\User, property: email }
